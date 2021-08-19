@@ -1,1 +1,1 @@
-web: gunicorn kpop_admin.wsgi
+web: gunicorn kpop_admin.wsgi --log-file -
