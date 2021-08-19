@@ -55,7 +55,7 @@ class Artist(models.Model):
     artist_name_EN = models.CharField(max_length=50)
     artist_picture = models.CharField(max_length=200, blank=True)
     artist_follow = models.IntegerField(default=0)
-    date_add = models.DateField(default=datetime.datetime.now)
+    date_add = models.DateField(default=datetime.date.today)
 
     def __str__(self):
         return self.artist_name_TH
