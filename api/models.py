@@ -5,10 +5,13 @@ from django.contrib.auth.models import (
     PermissionsMixin,
     BaseUserManager,
 )
-from django.contrib.auth.models import AbstractUser, BaseUserManager
 
+
+from django.contrib.auth.hashers import make_password
 
 # Create your models here.
+
+
 class CustomAccountManager(BaseUserManager):
     def create_superuser(self, user_name, name, password, **other_fields):
         other_fields.setdefault("is_staff", True)
@@ -18,7 +21,8 @@ class CustomAccountManager(BaseUserManager):
         if other_fields.get("is_staff") is not True:
             raise ValueError("Superuser must be assigned to is_staff=True.")
         if other_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser must be assigned to is_superuser=True.")
+            raise ValueError(
+                "Superuser must be assigned to is_superuser=True.")
 
         return self.create_user(user_name, name, password, **other_fields)
 
@@ -27,7 +31,7 @@ class CustomAccountManager(BaseUserManager):
         if not user_name:
             raise ValueError("You must provide an user_name")
 
-        user = self.model(user_name=user_name, name=name, **other_fields)
+        user = self.model(user_name=user_name)
         user.set_password(password)
         user.save()
         return user
@@ -37,9 +41,10 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
     user_name = models.CharField(max_length=150, unique=True)
     name = models.CharField(max_length=150, blank=True)
     user_picture = models.CharField(max_length=150, blank=True)
-    start_date = models.DateTimeField(default=datetime.datetime.now)
+    start_date = models.DateTimeField(default=datetime.date.today)
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    expo_noti = models.CharField(max_length=150, blank=True)
 
     objects = CustomAccountManager()
 
@@ -56,6 +61,7 @@ class Artist(models.Model):
     artist_picture = models.CharField(max_length=200, blank=True)
     artist_follow = models.IntegerField(default=0)
     date_add = models.DateField(default=datetime.date.today)
+    chat_url = models.CharField(max_length=200, blank=True)
 
     def __str__(self):
         return self.artist_name_TH
@@ -64,10 +70,10 @@ class Artist(models.Model):
 class ArtistFollow(models.Model):
     newuser = models.ForeignKey(NewUser, on_delete=models.CASCADE)
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
-    date = models.DateField(default=datetime.datetime.now)
+    date = models.DateField(default=datetime.date.today)
 
     class Meta:
-        unique_together = [['newuser', 'artist']]
+        unique_together = [["newuser", "artist"]]
 
 
 class Request(models.Model):
@@ -75,7 +81,7 @@ class Request(models.Model):
     request_header = models.CharField(max_length=50)
     request_type = models.IntegerField(default=1)
     request_detail = models.TextField()
-    request_date = models.DateField(default=datetime.datetime.now)
+    request_date = models.DateField(default=datetime.date.today)
 
     def __str__(self):
         return self.request_header
@@ -85,7 +91,7 @@ class Problem(models.Model):
     newuser = models.ForeignKey(NewUser, on_delete=models.CASCADE)
     problem_head = models.CharField(max_length=50, default="no_head")
     problem_detail = models.TextField(default="no_detail")
-    problem_date = models.DateField(default=datetime.datetime.now)
+    problem_date = models.DateField(default=datetime.date.today)
 
     def __str__(self):
         return self.problem_head
@@ -93,6 +99,8 @@ class Problem(models.Model):
 
 class Venue(models.Model):
     name = models.CharField(max_length=50)
+    mapname = models.CharField(max_length=150,blank = True)
+    mapurl = models.CharField(max_length=150,blank = True)
 
     def __str__(self):
         return self.name
@@ -100,6 +108,8 @@ class Venue(models.Model):
 
 class Ticket(models.Model):
     name = models.CharField(max_length=50)
+    type = models.IntegerField(default=1)
+    detail = models.CharField(max_length=150,blank = True)
 
     def __str__(self):
         return self.name
@@ -114,31 +124,47 @@ class Promoter(models.Model):
 
 class Event(models.Model):
     event_name = models.CharField(max_length=100)
-    date = models.DateField(default=datetime.datetime.now)
-    date_lastupdate = models.DateField(default=datetime.datetime.now)
-    show_day = models.DateField()
-    end_day = models.DateField()
-    ticket_open = models.DateField()
-    ticket_price = models.CharField(max_length=50)
-    promoter = models.ForeignKey(Promoter, on_delete=models.CASCADE)
-    venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
-    detail_update = models.CharField(max_length=50)
+    artistpost = models.ManyToManyField(Artist, blank=True)
+    ticketpost = models.ManyToManyField(Ticket, blank=True)
+    date = models.DateField(default=datetime.date.today)
+    date_lastupdate = models.DateField(default=datetime.date.today)
+    show_day = models.DateField(blank=True, null=True)
+    end_day = models.DateField(blank=True, null=True)
+    ticket_open = models.DateField(blank=True)
+    ticket_price = models.CharField(max_length=50, blank=True)
+    promoter = models.ForeignKey(
+        Promoter, on_delete=models.CASCADE, blank=True, null=True
+    )
+    venue = models.ForeignKey(
+        Venue, on_delete=models.CASCADE, blank=True, null=True)
+    detail_update = models.CharField(
+        max_length=50, default="เพิ่มข้อมูลเข้าสู่ระบบ")
     event_follower = models.IntegerField(default=0)
+    complete = models.IntegerField(default=0)
 
     def __str__(self):
         return self.event_name
 
 
-class ArtistEvent(models.Model):
-    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
-
-
-class TicketEvent(models.Model):
-    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
-
-
 class EventFollow(models.Model):
     user = models.ForeignKey(NewUser, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
+
+
+class AmazonKey(models.Model):
+    accessKey = models.CharField(max_length=100)
+    secretKey = models.CharField(max_length=100)
+
+class Noification(models.Model):
+    title = models.CharField(max_length=100)
+    body = models.CharField(max_length=100)
+    event = models.ForeignKey(EventFollow, on_delete=models.CASCADE)
+    date = models.DateField(default=datetime.date.today, blank=True, null=True)
+
+    def __str__(self):
+        return "%s (%s)" % (
+            self.tile,
+            ", ".join(event.id for event in self.event.all()),
+        )
+
+

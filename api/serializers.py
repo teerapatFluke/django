@@ -1,17 +1,36 @@
 from rest_framework import serializers
-from .models import Artist, NewUser, ArtistFollow, Request, Problem, Venue, Ticket, Promoter, Event, EventFollow, \
-    ArtistEvent, TicketEvent
+from django.contrib.auth.hashers import make_password
+
+from .models import (
+    Artist,
+    NewUser,
+    ArtistFollow,
+    Request,
+    Problem,
+    Venue,
+    Ticket,
+    Promoter,
+    Event,
+    EventFollow,
+    AmazonKey,
+    Noification
+)
 
 
 class NewuserSerializer(serializers.ModelSerializer):
     class Meta:
         model = NewUser
-        fields = [
-            "user_name",
-            "name",
-            "user_picture",
-            "is_staff"
-        ]
+        fields = ["user_name", "name", "user_picture",
+                  "is_staff", "password", "expo_noti"]
+        extra_kwargs = {"password": {"write_only": True}}
+
+    def create(self, validated_data):
+        password = validated_data.pop("password", None)
+        instance = self.Meta.model(**validated_data)
+        if password is not None:
+            instance.set_password(password)
+        instance.save()
+        return instance
 
 
 class ArtistSerializer(serializers.ModelSerializer):
@@ -23,7 +42,7 @@ class ArtistSerializer(serializers.ModelSerializer):
             "artist_name_EN",
             "artist_picture",
             "artist_follow",
-            "date_add"
+            "date_add","chat_url"
         ]
 
 
@@ -37,26 +56,34 @@ class ArtistFollowSerializer(serializers.ModelSerializer):
 class RequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Request
-        fields = ["id", "newuser", "request_header", "request_type", "request_detail", "request_date"]
+        fields = [
+            "id",
+            "newuser",
+            "request_header",
+            "request_type",
+            "request_detail",
+            "request_date",
+        ]
         depth = 0
 
 
 class ProblemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Problem
-        fields = ["id", "newuser", "problem_head", "problem_detail", "problem_date"]
+        fields = ["id", "newuser", "problem_head",
+                  "problem_detail", "problem_date"]
 
 
 class VenueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Venue
-        fields = ["id", "name"]
+        fields = ["id", "name","mapname","mapurl"]
 
 
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
-        fields = ["id", "name"]
+        fields = ["id", "name","type","detail"]
 
 
 class PromoterSerializer(serializers.ModelSerializer):
@@ -68,9 +95,24 @@ class PromoterSerializer(serializers.ModelSerializer):
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ["id", "event_name", "date", "date_lastupdate", "show_day", "end_day", "ticket_open", "ticket_price",
-                  "promoter", "promoter", "venue", "detail_update", "event_follower"]
-        depth = 1
+        fields = [
+            "id",
+            "event_name",
+            "artistpost",
+            "ticketpost",
+            "date",
+            "date_lastupdate",
+            "show_day",
+            "end_day",
+            "ticket_open",
+            "ticket_price",
+            "promoter",
+            "venue",
+            "detail_update",
+            "event_follower",
+            "complete",
+        ]
+        depth = 0
 
 
 class EventFollowSerializer(serializers.ModelSerializer):
@@ -79,13 +121,15 @@ class EventFollowSerializer(serializers.ModelSerializer):
         fields = ["id", "user", "event"]
 
 
-class ArtistEventSerializer(serializers.ModelSerializer):
+class AmazonSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ArtistEvent
-        fields = ["id", "artist", "event"]
+        model = AmazonKey
+        fields = ["accessKey", "secretKey"]
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Noification
+        fields = ["id","title", "body", "event","date"]
+        depth = 0
 
 
-class TicketEventSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TicketEvent
-        fields = ["id", "ticket", "event"]
