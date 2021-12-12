@@ -10,14 +10,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-!y=7_a()kvl1_)9_!7q!chgdgv9+14)e+jf@jatcm=3ooa%q&o"
-
+#SECRET_KEY = "django-insecure-!y=7_a()kvl1_)9_!7q!chgdgv9+14)e+jf@jatcm=3ooa%q&o"
+SECRET_KEY = os.environ.get("SECRET_KEY", None)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-   "*"
-]
+ALLOWED_HOSTS = ['locahost','kpop.djangokpop.com','128.199.116.6']
 
 # Application definition
 
@@ -67,8 +65,16 @@ WSGI_APPLICATION = "kpop_admin.wsgi.application"
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 default_dburl = "sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3")
 DATABASES = {
-    "default": config("DATABASE_URL", default=default_dburl, cast=dburl),
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'db-django',
+        'USER': 'django',
+        'PASSWORD': os.environ.get("DJANGO_DB_PASSWORD",None),
+        'HOST': 'private-db-django-do-user-9920243-0.b.db.ondigitalocean.com',
+        'PORT': 25060,
+    }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -84,7 +90,8 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        
+"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -106,7 +113,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 STATICFILE_DIRS = [
     "static/images",
     "static/css",
