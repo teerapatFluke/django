@@ -15,7 +15,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", None)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['locahost','kpop.djangokpop.com','128.199.116.6']
+ALLOWED_HOSTS = ['localhost','kpop.djangokpop.com','128.199.116.6']
 
 # Application definition
 
