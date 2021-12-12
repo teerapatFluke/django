@@ -10,7 +10,7 @@ from .models import (
     Promoter,
     Event,
     EventFollow,
-    AmazonKey,
+    AmazonKey,ChatRoom
 )
 from django.contrib.auth.admin import UserAdmin
 
@@ -66,3 +66,4 @@ admin.site.register(Promoter)
 admin.site.register(Event)
 admin.site.register(EventFollow)
 admin.site.register(AmazonKey)
+admin.site.register(ChatRoom)

@@ -14,7 +14,7 @@ from .views import (
     EventViewSet,
     EventFollowViewSet,
     AmazonViewSet,
-    NotificationViewSet
+    NotificationViewSet,ChatRoomViewSet,
 )
 
 router = routers.DefaultRouter()
@@ -30,6 +30,8 @@ router.register("eventfw", EventFollowViewSet)
 router.register("problem", ProblemViewSet)
 router.register("amazon", AmazonViewSet)
 router.register("notification", NotificationViewSet)
+router.register("chatroom", ChatRoomViewSet)
+
 urlpatterns = [
     path("", include(router.urls)),
   

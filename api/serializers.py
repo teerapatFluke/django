@@ -13,15 +13,15 @@ from .models import (
     Event,
     EventFollow,
     AmazonKey,
-    Noification
+    Noification,ChatRoom
 )
 
 
 class NewuserSerializer(serializers.ModelSerializer):
     class Meta:
         model = NewUser
-        fields = ["user_name", "name", "user_picture",
-                  "is_staff", "password", "expo_noti"]
+        fields = [  "id","user_name", "name", "user_picture",
+                  "is_staff","is_superuser", "password", "expo_noti"]
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
@@ -42,7 +42,7 @@ class ArtistSerializer(serializers.ModelSerializer):
             "artist_name_EN",
             "artist_picture",
             "artist_follow",
-            "date_add","chat_url"
+            "date_add", "chat_url"
         ]
 
 
@@ -62,7 +62,7 @@ class RequestSerializer(serializers.ModelSerializer):
             "request_header",
             "request_type",
             "request_detail",
-            "request_date",
+            "request_date","request_read"
         ]
         depth = 0
 
@@ -71,7 +71,7 @@ class ProblemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Problem
         fields = ["id", "newuser", "problem_head",
-                  "problem_detail", "problem_date"]
+                  "problem_detail", "problem_date","problem_read"]
 
 
 class VenueSerializer(serializers.ModelSerializer):
@@ -110,7 +110,7 @@ class EventSerializer(serializers.ModelSerializer):
             "venue",
             "detail_update",
             "event_follower",
-            "complete",
+            "complete","ticket_price_end"
         ]
         depth = 0
 
@@ -130,6 +130,13 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Noification
         fields = ["id","title", "body", "event","date"]
+        depth = 0
+
+
+class ChatRoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatRoom
+        fields = ["id","artist","user"]
         depth = 0
 
 
